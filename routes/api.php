@@ -21,15 +21,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-/*
-Route::get('/carts',[CartController::class,'index']);
 
-Route::get('/carts/{cart_id}',[CartController::class,'show']);
-
-
-Route::get('/items',[ItemController::class,'index']);
-*/
-
-Route::resources([
+/*Route::resources([
     '/carts' => CartController::class,
-]);
+]);*/
+
+Route::get('/carts',[CartController::class,'index']);
+Route::get('/carts/{cart_id}',[CartController::class,'show']);
+Route::get('/carts/{cart_id}/items',[CartController::class,'show_items']);
+
+Route::post('/carts',[CartController::class,'store']);
+
+Route::put('/carts/{cart_id}/items',[CartController::class,'add_items']);
+
+Route::delete('/carts/{cart_id}/items/{pivot_id}',[CartController::class,'delete_item']);

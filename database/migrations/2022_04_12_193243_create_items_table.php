@@ -15,6 +15,9 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
+            $table->string("sku")->unique();
+            $table->string('name');
+            $table->float('price', 8, 2);
             $table->timestamps();
         });
     }

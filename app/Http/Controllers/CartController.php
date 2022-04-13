@@ -157,7 +157,7 @@ class CartController extends ApiController
                     'Added items' => Item_resource::collection($items)
                 ];
 
-                $message = "Items can't be added! No items found!";
+                $message = "Items can't be added to the cart! No items found!";
                 $success = false;
                 $code = 400; //bad request
             }
@@ -178,10 +178,25 @@ class CartController extends ApiController
     public function delete_item($cart_id,$pivot_id){
         //verifichiamo che esista una relazione tra il pivot_id che abbiamo scelto e il cart_id
         $item = Cart_Item::where("id",$pivot_id)->where("cart_id",$cart_id)->first();
-
-        if($item->count() > 0){
-            $item = Cart_Item::where("id",$pivot_id)->where("cart_id",$cart_id)->first()->delete();
+        
+        if($item != null){
+            //cancelliamo la relazione tra item e cart
+            Cart_Item::where("id",$pivot_id)->where("cart_id",$cart_id)->first()->delete();
+            $message = "Cart item succesfully removed!";
+            $success = true;
+            $code = 200;             
+        }else{
+            $item = [];
+            $message = "Can't remove item; No association found!";
+            $success = false;
+            $code = 400;    
         }
+
+        $data = [
+            'Deleted item' => $item,
+        ];
+
+        return $this->response_maker($success,$data,$message,$code);
     }
 
 

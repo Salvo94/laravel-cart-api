@@ -15,6 +15,6 @@ class Item extends Model
     {
         //relazione molti a molti -> ogni prodotto può appartenere a uno o più carrelli ed ogni carrello può avere uno o più prodotti
         //cart_items -> il custon name della tabella intermediaria
-        return $this->belongsToMany(Cart::class, "cart_products")->withPivot(["id"])->withTimestamps();
+        return $this->belongsToMany(Cart::class, "cart_items")->withPivot(["id"])->withTimestamps();
     }
 }

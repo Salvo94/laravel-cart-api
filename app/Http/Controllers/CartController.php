@@ -26,9 +26,11 @@ class CartController extends ApiController
         }else{
             $message = "Cart list retrieved";
         }
-
+        $data = [
+            'cart list' => Cart_resource::collection($carts)
+        ];
         //response_maker($success,$result,$message,$code)
-        return $this->response_maker(true,Cart_resource::collection($carts),$message,200);
+        return $this->response_maker(true,$data,$message,200);
     }
 
     
@@ -84,21 +86,23 @@ class CartController extends ApiController
         if($cart != null){
             if($cart->count() > 0){
                 $success = true;
-                $data = new Cart_resource($cart);
                 $message = "Cart found!";
                 $code = 200;
             }
         }else{
             $success = false;
-            $data = [];
             $message = "Cart not found!";
             $code = 404;
         }
+
+        $data = [
+            "selected cart" => new Cart_resource($cart)
+        ];
         
         return $this->response_maker($success,$data,$message,$code);
     }
 
-    //visualizza un carrello
+    //visualizza gli items di un carrello
     public function show_items($cart_id)
     {
         $cart = Cart::find($cart_id);
@@ -106,16 +110,20 @@ class CartController extends ApiController
         if($cart != null){
             if($cart->count() > 0){
                 $success = true;
-                $data = Item_resource::collection($cart->items()->get());
+                $items = Item_resource::collection($cart->items()->get());
                 $message = "Cart found!";
                 $code = 200;
             }
         }else{
             $success = false;
-            $data = [];
+            $items = "";
             $message = "Can't show items; Cart not found!";
             $code = 404;
         }
+
+        $data = [
+            "cart items" => $items
+        ];
 
         return $this->response_maker($success,$data,$message,$code);
     }
@@ -175,13 +183,20 @@ class CartController extends ApiController
     }
 
 
-    public function delete_item($cart_id,$pivot_id){
+    public function remove_cart_item($cart_id,$pivot_id){
         //verifichiamo che esista una relazione tra il pivot_id che abbiamo scelto e il cart_id
         $item = Cart_Item::where("id",$pivot_id)->where("cart_id",$cart_id)->first();
         
         if($item != null){
             //cancelliamo la relazione tra item e cart
             Cart_Item::where("id",$pivot_id)->where("cart_id",$cart_id)->first()->delete();
+
+            //verifichiamo che esistano ancora items all'interno del carrelo, altrimenti cancelliamolo
+            $cart = Cart::where("id",$cart_id)->first();
+            if(($cart->items())->count() == 0){
+                $cart->delete();
+            }          
+
             $message = "Cart item succesfully removed!";
             $success = true;
             $code = 200;             
@@ -199,21 +214,4 @@ class CartController extends ApiController
         return $this->response_maker($success,$data,$message,$code);
     }
 
-
-    public function edit(Cart $cart)
-    {
-        //
-    }
-
-  
-    public function update(Request $request, Cart $cart)
-    {
-        //
-    }
-
- 
-    public function destroy(Cart $cart)
-    {
-        //
-    }
 }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('cart_id')->unsigned();
             $table->integer('item_id')->unsigned();
             $table->timestamps();
+            $table->softDeletesTz($column = 'deleted_at', $precision = 0);
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cart__items');
+        Schema::dropIfExists('cart_items');
     }
 };

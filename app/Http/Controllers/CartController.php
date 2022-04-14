@@ -9,6 +9,9 @@ use App\Models\Cart_Item;
 use App\Http\Resources\Cart_resource;
 use App\Http\Resources\Item_resource;
 
+use App\Exports\CartsExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 use App\Http\Controllers\Api\ApiController as ApiController;
 
 use Illuminate\Http\Request;
@@ -63,12 +66,16 @@ class CartController extends ApiController
             $message = "cart successfully created";
             $success = true;
             $code = 201; //creato
+
+            //in fine esportiamo la lista dei carrelli creati
+            Excel::store(new CartsExport(), 'Carts.xls');
         }else{
             $data = [
                 'Created cart' => [],
                 'Found items' => $found_items."/".$number_items,
                 'Added items' => Item_resource::collection($items)
             ];
+
             $message = "Cart can't be added! No items found!";
             $success = false;
             $code = 400; //bad request
@@ -102,6 +109,7 @@ class CartController extends ApiController
         return $this->response_maker($success,$data,$message,$code);
     }
 
+    
     //visualizza gli items di un carrello
     public function show_items($cart_id)
     {
@@ -110,7 +118,17 @@ class CartController extends ApiController
         if($cart != null){
             if($cart->count() > 0){
                 $success = true;
-                $items = Item_resource::collection($cart->items()->get());
+                $cart_items = $cart->items()->get();
+                
+                //un foreach che ci permette di simulare la visualizzazione di una tabella con delle righe soft deleted
+                //questo perchè con i pivot non è possibile riconoscere le righe soft deleted, poichè bisognerbbe trattarli come dei model
+                foreach($cart_items as $i => $cart_item){
+                    if($cart_items[$i]->pivot->deleted_at != null){
+                        unset($cart_items[$i]);
+                    }      
+                }
+
+                $items = Item_resource::collection($cart_items);
                 $message = "Cart found!";
                 $code = 200;
             }
@@ -193,9 +211,22 @@ class CartController extends ApiController
 
             //verifichiamo che esistano ancora items all'interno del carrelo, altrimenti cancelliamolo
             $cart = Cart::where("id",$cart_id)->first();
-            if(($cart->items())->count() == 0){
+            
+            $cart_items = $cart->items()->get();
+            
+            //visto che con le tabelle pivot non è possibile non contare direttamente le righe soft deleted
+            //si effettuerà un foreach dell'object che controllerà se c'è almeno una riga con la colonna deleted_at == null
+            //in  modo tale da considerare il carrello non vuoto
+            $empty_cart = true;
+            
+            foreach($cart_items as $i => $cart_item){
+                if($cart_items[$i]->pivot->deleted_at == null){
+                    $empty_cart = false;
+                }      
+            }
+            if($empty_cart == true){
                 $cart->delete();
-            }          
+            }       
 
             $message = "Cart item succesfully removed!";
             $success = true;

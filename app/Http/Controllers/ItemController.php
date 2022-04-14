@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Cart;
+use App\Models\Cart_Item;
 
 use Illuminate\Http\Request;
 
@@ -73,12 +74,24 @@ class ItemController extends ApiController
         
         if($item != null){
             //cancelliamo la relazione tra l'item da cancellare e il carrello
-            $item->carts()->detach();
+            Cart_item::where("item_id",$item_id)->delete();
 
             //cancelliamo i carrelli che restano senza items al loro interno
             $carts = Cart::all();
             foreach($carts as $cart){
-                if(($cart->items())->count() == 0){
+                $cart_items = $cart->items()->get();
+                
+                //visto che con le tabelle pivot non è possibile non contare direttamente le righe soft deleted
+                //si effettuerà un foreach dell'object che controllerà se c'è almeno una riga con la colonna deleted_at == null
+                //in  modo tale da considerare il carrello non vuoto
+                $empty_cart = true;
+                
+                foreach($cart_items as $i => $cart_item){
+                    if($cart_items[$i]->pivot->deleted_at == null){
+                        $empty_cart = false;
+                    }      
+                }
+                if($empty_cart == true){
                     $cart->delete();
                 }
             }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,35 +18,39 @@ use App\Http\Controllers\ItemController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+
+
+
+Route::post('/login',[LoginController::class,'authenticate'])->name("login");
+Route::post('/register',[LoginController::class,'create_user'])->name("register");
+Route::get('/user',[LoginController::class,'get_user'])->name("user")->middleware('auth:sanctum');
+Route::get('/logout',[LoginController::class,'logout'])->name("logout")->middleware('auth:sanctum');
 
 
 /*Route::resources([
     '/carts' => CartController::class,
 ]);*/
 
+Route::middleware('auth:sanctum')->group( function () {
+    //Gestione carrello (carts)
+    Route::get('/carts',[CartController::class,'index']);
+    Route::get('/carts/{cart_id}',[CartController::class,'show']);
+    Route::get('/carts/{cart_id}/items',[CartController::class,'show_items']);
 
-//Gestione carrello (carts)
-Route::get('/carts',[CartController::class,'index']);
-Route::get('/carts/{cart_id}',[CartController::class,'show']);
-Route::get('/carts/{cart_id}/items',[CartController::class,'show_items']);
+    Route::post('/carts',[CartController::class,'store']);
 
-Route::post('/carts',[CartController::class,'store']);
+    Route::put('/carts/{cart_id}/items',[CartController::class,'add_items']);
 
-Route::put('/carts/{cart_id}/items',[CartController::class,'add_items']);
-
-Route::delete('/carts/{cart_id}/items/{pivot_id}',[CartController::class,'remove_cart_item']);
+    Route::delete('/carts/{cart_id}/items/{pivot_id}',[CartController::class,'remove_cart_item']);
 
 
-//Gestione articoli (items)
-Route::get('/items',[ItemController::class,'index']);
+    //Gestione articoli (items)
+    Route::get('/items',[ItemController::class,'index']);
 
-Route::post('/items',[ItemController::class,'store']);
+    Route::post('/items',[ItemController::class,'store']);
 
-Route::delete('/items/{item_id}',[ItemController::class,'delete_item']);
-
+    Route::delete('/items/{item_id}',[ItemController::class,'delete_item']);
+});
 
 Route::fallback(function (){
     abort(404, 'API resource not found');

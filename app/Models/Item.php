@@ -12,6 +12,7 @@ class Item extends Model
 
 
     protected $table = 'items';
+
     
     public function carts()
     {

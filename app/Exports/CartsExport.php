@@ -2,29 +2,35 @@
 
 namespace App\Exports;
 
-use Maatwebsite\Excel\Concerns\Exportable;
-use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
 use App\Models\Cart;
 
-class CartsExport implements WithMultipleSheets
+class CartsExport implements FromCollection, WithMapping, WithHeadings
 {
-    use Exportable;
 
- 
-
-    /**
-     * @return array
-     */
-    public function sheets(): array
+    public function headings(): array
     {
-        $sheets = [];
-        $carts = Cart::all();
+        return [
+            'Id_carrello',
+            "Data Creazione Carrello",
+            "Data rimozione carrello"
+        ];
+    }
 
-        foreach ($carts as $cart) {
-            $sheets[] = new Sheets\CartItemSheet($cart);
-        }
+    public function collection()
+    {
+        return Cart::withTrashed()->get();
+    }
 
-        return $sheets;
+    public function map($carts): array
+    {
+        return [
+            $carts->id,
+            $carts->created_at,
+            $carts->deleted_at,
+        ];
     }
 }

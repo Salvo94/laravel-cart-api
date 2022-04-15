@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 
 use App\Http\Resources\Item_resource;
 
+use App\Exports\CartsExport;
+use App\Exports\CartItemsExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 use App\Http\Controllers\Api\ApiController as ApiController;
 
 use Illuminate\Support\Facades\Validator;
@@ -93,6 +97,9 @@ class ItemController extends ApiController
                 }
                 if($empty_cart == true){
                     $cart->delete();
+
+                    //aggiorniamo ed esportiamo la lista dei carrelli per far comparire la data di rimozione del carrello cancellato
+                    Excel::store(new CartsExport(), 'Created_carts.csv');
                 }
             }
 
@@ -100,7 +107,10 @@ class ItemController extends ApiController
             Item::where("id",$item_id)->first()->delete();
             $message = "Item succesfully deleted from database";
             $success = true;
-            $code = 200;             
+            $code = 200;  
+            
+            //stampiamo la lista aggiornata degllo storico degli articoli nei carrelli
+            Excel::store(new CartItemsExport(), 'Cart_actions_history.csv');                
         }else{
             $item = [];
             $message = "Can't remove item; No item found";

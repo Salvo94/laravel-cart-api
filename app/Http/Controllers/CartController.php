@@ -10,6 +10,7 @@ use App\Http\Resources\Cart_resource;
 use App\Http\Resources\Item_resource;
 
 use App\Exports\CartsExport;
+use App\Exports\CartItemsExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 use App\Http\Controllers\Api\ApiController as ApiController;
@@ -68,7 +69,9 @@ class CartController extends ApiController
             $code = 201; //creato
 
             //in fine esportiamo la lista dei carrelli creati
-            Excel::store(new CartsExport(), 'Carts.xls');
+            Excel::store(new CartsExport(), 'Created_carts.csv');
+            //insieme alla lista dei prodotti inseriti nel carrello
+            Excel::store(new CartItemsExport(), 'Cart_actions_history.csv');
         }else{
             $data = [
                 'Created cart' => [],
@@ -176,6 +179,9 @@ class CartController extends ApiController
                 $message = "Item succesfully added to the cart";
                 $success = true;
                 $code = 201; //creato
+
+                //esportiamo la lista aggiornata dello storico articoli nei carrelli
+                Excel::store(new CartItemsExport(), 'Cart_actions_history.csv');
             }else{
                 $data = [
                     'Selected cart' => $cart,
@@ -226,11 +232,17 @@ class CartController extends ApiController
             }
             if($empty_cart == true){
                 $cart->delete();
+
+                //aggiorniamo ed esportiamo la lista dei carrelli per far comparire la data di rimozione del carrello cancellato
+                Excel::store(new CartsExport(), 'Created_carts.csv');
             }       
 
             $message = "Cart item succesfully removed!";
             $success = true;
-            $code = 200;             
+            $code = 200;        
+
+            //stampiamo la lista aggiornata degllo storico degli articoli nei carrelli
+            Excel::store(new CartItemsExport(), 'Cart_actions_history.csv');     
         }else{
             $item = [];
             $message = "Can't remove item; No association found!";

@@ -8,7 +8,7 @@ use App\Models\Cart;
 class CartItemSheet implements FromCollection
 {
     private $cart;
-    
+
     public function __construct(Cart $cart)
     {
         $this->cart = $cart;

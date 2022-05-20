@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends ApiController
 {
-    
     /**
      * Handle an authentication attempt.
      *
@@ -19,14 +18,15 @@ class LoginController extends ApiController
      * @return \Illuminate\Http\Response
      */
 
-    public function create_user(Request $request){
+    public function create_user(Request $request)
+    {
         $register_data = $request->validate([
             'name' => ['required','String'],
             'email' => ['required', 'email','unique:App\Models\User,email'],
             'password' => ['required'],
         ]);
-        
-        $user = new User;
+
+        $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
@@ -41,8 +41,8 @@ class LoginController extends ApiController
         ];
         $message = "User successfully created";
         $code = 200;
-        
-        return $this->response_maker($success,$data,$message,$code);
+
+        return $this->response_maker($success, $data, $message, $code);
     }
 
     public function authenticate(Request $request)
@@ -51,9 +51,9 @@ class LoginController extends ApiController
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
- 
+
         if (Auth::attempt($credentials)) {
-            $user = Auth::user(); 
+            $user = Auth::user();
             $success = true;
             $data = [
                 'token'=> $user->createToken('auth-token')->plainTextToken,
@@ -61,25 +61,27 @@ class LoginController extends ApiController
             ];
             $message = "user logged";
             $code = 200;
-        }else{
+        } else {
             $success = false;
             $data = [];
             $message = "user not found";
             $code = 401;
         }
-       
-        return $this->response_maker($success,$data,$message,$code);
+
+        return $this->response_maker($success, $data, $message, $code);
     }
 
-    public function get_user(Request $request){
+    public function get_user(Request $request)
+    {
         $success = true;
         $data = $request->user();
         $message = "Logged user details";
         $code = 200;
-        return $this->response_maker($success,$data,$message,$code);
+        return $this->response_maker($success, $data, $message, $code);
     }
 
-    public function logout(Request $request){
+    public function logout(Request $request)
+    {
         $user = $request->user();
         $user->currentAccessToken()->delete();
 
@@ -88,8 +90,6 @@ class LoginController extends ApiController
         $message = "User token succesfully removed!";
         $code = 200;
 
-        return $this->response_maker($success,$data,$message,$code);
+        return $this->response_maker($success, $data, $message, $code);
     }
-    
-   
 }

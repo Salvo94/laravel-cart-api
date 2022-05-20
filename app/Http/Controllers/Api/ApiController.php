@@ -7,13 +7,14 @@ use Illuminate\Http\Request;
 
 class ApiController extends Controller
 {
-    public function response_maker($success,$result,$message,$code){
+    public function response_maker($success, $result, $message, $code)
+    {
         $response = [
             'success' => $success,
             'data' => $result,
             'messasge' => $message
         ];
 
-        return response()->json($response,$code);
+        return response()->json($response, $code);
     }
 }

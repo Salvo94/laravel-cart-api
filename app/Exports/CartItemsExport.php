@@ -10,7 +10,6 @@ use App\Models\Cart;
 
 class CartItemsExport implements FromCollection, WithMapping, WithHeadings
 {
-
     public function headings(): array
     {
         return [
@@ -32,7 +31,7 @@ class CartItemsExport implements FromCollection, WithMapping, WithHeadings
     {
         $row = [];
         $cart_items = $carts->items()->get();
-        foreach($cart_items as $cart_item){
+        foreach ($cart_items as $cart_item) {
             $inner_row =[
                 $carts->id,
                 $cart_item->sku,
@@ -42,7 +41,7 @@ class CartItemsExport implements FromCollection, WithMapping, WithHeadings
                 $cart_item->pivot->deleted_at,
 
             ];
-            array_push($row,$inner_row);
+            array_push($row, $inner_row);
         }
         //$row = new Sheets\CartItemSheet($carts);
 

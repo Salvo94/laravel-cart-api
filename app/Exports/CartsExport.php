@@ -10,7 +10,6 @@ use App\Models\Cart;
 
 class CartsExport implements FromCollection, WithMapping, WithHeadings
 {
-
     public function headings(): array
     {
         return [

@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class Item extends Model
 {
     use HasFactory;
@@ -13,7 +12,7 @@ class Item extends Model
 
     protected $table = 'items';
 
-    
+
     public function carts()
     {
         //relazione molti a molti -> ogni prodotto può appartenere a uno o più carrelli ed ogni carrello può avere uno o più prodotti
